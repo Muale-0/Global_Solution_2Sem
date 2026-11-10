@@ -1,0 +1,12 @@
+Global Solution 2026/2 - CitizenTech
+Disciplina: Front-End Design Engineering
+Projeto: Cidade em Dia
+Turma: 1TDSPH
+
+Integrantes
+RM571403 - Giovanni Lopez Zavam - 1TDSPH
+RM569741 - Thiago Andrade Silva Piedade - 1TDSPH
+RM573441 - Arthur Palacio Alves - 1TDSPH
+RM572674 - Murilo Martins de Campos - 1TDSPH
+
+Repositorio: https://github.com/Muale-0/Global_Solution_2Sem
