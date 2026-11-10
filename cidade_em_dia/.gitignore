@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+docs-gs/
+.claude/
+CLAUDE.md
+.env

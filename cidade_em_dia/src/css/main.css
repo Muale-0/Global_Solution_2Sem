@@ -1,0 +1,150 @@
+/* Carrega o Tailwind inteiro (reset + classes utilitárias). */
+@import "tailwindcss";
+
+/*
+  Ensina ao Tailwind que o prefixo "dark:" vale quando a tag <html>
+  tem a classe "dark" (é o botão de tema que põe e tira essa classe).
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  @theme cria "tokens" do projeto. Cada variável vira classe do Tailwind:
+  --color-marca-700 passa a existir como bg-marca-700, text-marca-700 etc.
+  Assim as cores do Cidade em Dia ficam definidas em um único lugar.
+*/
+@theme {
+  /* Azul da marca (muda no modo escuro, veja o bloco .dark abaixo) */
+  --color-marca-50: #eef4ff;
+  --color-marca-100: #dbe6fe;
+  --color-marca-200: #bcd0fd;
+  --color-marca-600: #2a5bd7;
+  --color-marca-700: #1f47b0;
+  --color-marca-800: #1a3a8a;
+  --color-marca-900: #142c66;
+
+  /* Amarelo de sinalização (igual nos dois modos) */
+  --color-destaque-300: #ffdd75;
+  --color-destaque-400: #ffc933;
+  --color-destaque-500: #f0ad00;
+
+  /* Azuis e pretos fixos, para áreas que são escuras nos dois modos
+     (destaque da Home e rodapé). */
+  --color-azul-600: #2a5bd7;
+  --color-azul-800: #1a3a8a;
+  --color-noite-900: #0a1230;
+  --color-noite-950: #05070d;
+
+  /* Cores "por função": o nome diz para que serve, não qual cor é.
+     superficie = fundo de cartões e campos; acao = botão principal. */
+  --color-superficie: #ffffff;
+  --color-acao: #1f47b0;
+  --color-acao-forte: #1a3a8a;
+  --color-sobre-acao: #ffffff;
+
+  /* Animações: viram as classes animate-surgir e animate-flutuar. */
+  --animate-surgir: surgir 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-flutuar: flutuar 6s ease-in-out infinite;
+
+  @keyframes surgir {
+    from {
+      opacity: 0;
+      transform: translateY(1.25rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes flutuar {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-0.75rem);
+    }
+  }
+}
+
+/*
+  MODO ESCURO
+  As classes do Tailwind usam variáveis (bg-slate-50 = var(--color-slate-50)).
+  Trocando o valor das variáveis aqui, a página inteira muda de cor sem
+  precisar mexer nas classes de cada componente.
+  A escala fica "invertida": o que era claro vira escuro e vice-versa.
+*/
+.dark {
+  /* Avisa o navegador para desenhar barras de rolagem e listas em escuro. */
+  color-scheme: dark;
+
+  /* Cinzas: fundo preto-azulado, textos claros */
+  --color-slate-50: #05070d;
+  --color-slate-100: #141a28;
+  --color-slate-200: #232b3d;
+  --color-slate-300: #36405a;
+  --color-slate-500: #8b95ad;
+  --color-slate-600: #a7b0c6;
+  --color-slate-700: #c5ccdc;
+  --color-slate-800: #e1e6f0;
+  --color-slate-900: #f3f5fa;
+
+  /* Azul da marca: tons claros para texto, tons escuros para fundo */
+  --color-marca-50: #0c1530;
+  --color-marca-100: #13224d;
+  --color-marca-200: #233e86;
+  --color-marca-600: #6a94ff;
+  --color-marca-700: #86a8ff;
+  --color-marca-800: #adc4ff;
+  --color-marca-900: #d9e4ff;
+
+  /* No escuro, o botão principal é amarelo com texto preto */
+  --color-superficie: #0e121c;
+  --color-acao: #ffc933;
+  --color-acao-forte: #ffdd75;
+  --color-sobre-acao: #05070d;
+
+  /* Cores dos selos de status e dos avisos */
+  --color-amber-50: #2a1a03;
+  --color-amber-100: #3d2706;
+  --color-amber-300: #8a5a0a;
+  --color-amber-900: #fde8b0;
+  --color-amber-950: #fff3d1;
+
+  --color-emerald-50: #04231a;
+  --color-emerald-100: #073526;
+  --color-emerald-300: #0f6b4c;
+  --color-emerald-800: #8ee6c0;
+  --color-emerald-900: #b4f0d6;
+  --color-emerald-950: #d6f8e8;
+
+  --color-rose-50: #2b0a12;
+  --color-rose-100: #42101c;
+  --color-rose-200: #5e1828;
+  --color-rose-300: #86233a;
+  --color-rose-600: #fb7185;
+  --color-rose-700: #fda4af;
+  --color-rose-800: #fecdd3;
+  --color-rose-900: #ffe4e6;
+  --color-rose-950: #fff1f2;
+}
+
+/* Rolagem suave ao usar o link "Pular para o conteúdo". */
+html {
+  scroll-behavior: smooth;
+}
+
+/*
+  Acessibilidade: quem configurou o sistema para "reduzir movimento"
+  não recebe animações nem transições.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

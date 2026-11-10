@@ -1,9 +1,32 @@
 <!doctype html>
-<html lang="pt.br">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>cidade_em_dia</title>
+    <meta
+      name="description"
+      content="Cidade em Dia: registre e acompanhe problemas de zeladoria urbana em São Paulo."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Cidade em Dia</title>
+    <!--
+      Aplica o tema antes de a página aparecer, para não "piscar" em claro
+      quando a pessoa escolheu o modo escuro. Usa a escolha salva ou,
+      se não houver, a preferência do sistema.
+    -->
+    <script>
+      (function () {
+        try {
+          var salvo = localStorage.getItem('cidade-em-dia:tema');
+          var escuro = salvo
+            ? salvo === 'escuro'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (escuro) document.documentElement.classList.add('dark');
+        } catch (erro) {
+          // Sem acesso ao localStorage: fica no modo claro.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
