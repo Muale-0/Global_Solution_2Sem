@@ -1,7 +1,7 @@
-import fotoArthur from '../assets/integrantes/arthur.jpg';
-import fotoGiovanni from '../assets/integrantes/giovanni.jpg';
-import fotoMurilo from '../assets/integrantes/murilo.jpg';
-import fotoThiago from '../assets/integrantes/thiago.jpg';
+import fotoArthur from '../assets/arthur.jpg';
+import fotoGiovanni from '../assets/giovanni.jpg';
+import fotoMurilo from '../assets/murilo.jpg';
+import fotoThiago from '../assets/thiago.jpg';
 import type { Integrante } from '../types/site';
 
 // Importar a imagem faz o Vite copiar o arquivo para o site final
