@@ -9,7 +9,7 @@ Projeto da **Global Solution 2026/2 da FIAP**, tema **CitizenTech**, disciplina 
 | O quê | Endereço |
 | --- | --- |
 | Repositório no GitHub | https://github.com/Muale-0/Global_Solution_2Sem |
-| Aplicação publicada (Vercel) | _a preencher após o deploy_ |
+| Aplicação publicada (Vercel) | https://global-solution-2-sem-psi.vercel.app/ |
 | API Java (Render) | https://cidade-em-dia-q2dd.onrender.com |
 | Vídeo de demonstração (YouTube) | _a preencher após a gravação_ |
 
