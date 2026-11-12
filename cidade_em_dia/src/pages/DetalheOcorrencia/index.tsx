@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Botao, LinkBotao } from '../../components/Botao/Botao';
 import { estiloCampo } from '../../components/CampoFormulario/estilos';
 import Cartao from '../../components/Cartao/Cartao';
@@ -13,6 +13,7 @@ import { mensagemDeErro } from '../../services/api';
 import {
   buscarOcorrencia,
   confirmarOcorrencia,
+  excluirOcorrencia,
   listarAtualizacoes,
   listarConfirmacoes,
 } from '../../services/ocorrenciaService';
@@ -37,6 +38,7 @@ export default function DetalheOcorrencia() {
 
   const { morador } = useSessao();
   const { mostrarAviso } = useAviso();
+  const navegar = useNavigate();
 
   const [estado, setEstado] = useState<EstadoRequisicao<DadosDetalhe>>({
     status: 'carregando',
@@ -44,6 +46,9 @@ export default function DetalheOcorrencia() {
   const [tentativa, setTentativa] = useState(0);
   const [comentario, setComentario] = useState('');
   const [confirmando, setConfirmando] = useState(false);
+  // Excluir tem duas etapas: primeiro pergunta, depois apaga de verdade.
+  const [pedindoExclusao, setPedindoExclusao] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
 
   useEffect(() => {
     if (!idValido) return;
@@ -99,6 +104,20 @@ export default function DetalheOcorrencia() {
       mostrarAviso({ tipo: 'erro', mensagem: mensagemDeErro(erro) });
     } finally {
       setConfirmando(false);
+    }
+  }
+
+  async function excluir() {
+    setExcluindo(true);
+    try {
+      await excluirOcorrencia(ocorrenciaId);
+      mostrarAviso({ tipo: 'sucesso', mensagem: 'Ocorrência excluída.' });
+      // A ocorrência não existe mais, então volta para a lista.
+      navegar('/ocorrencias');
+    } catch (erro) {
+      mostrarAviso({ tipo: 'erro', mensagem: mensagemDeErro(erro) });
+      setExcluindo(false);
+      setPedindoExclusao(false);
     }
   }
 
@@ -195,10 +214,45 @@ export default function DetalheOcorrencia() {
               </a>
             )}
 
+            {/* Só quem registrou vê as opções de editar e excluir. */}
             {ehAutor && (
-              <p className="mt-5 rounded-lg bg-marca-50 p-3 text-sm font-semibold text-marca-900">
-                Você registrou esta ocorrência.
-              </p>
+              <div className="mt-5 rounded-lg bg-marca-50 p-4">
+                <p className="text-sm font-semibold text-marca-900">
+                  Você registrou esta ocorrência.
+                </p>
+
+                {pedindoExclusao ? (
+                  <div role="alert" className="mt-3">
+                    <p className="text-sm text-marca-900">
+                      Tem certeza? A ocorrência será apagada e não dá para desfazer.
+                    </p>
+                    <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                      <Botao variante="perigo" onClick={excluir} disabled={excluindo}>
+                        {excluindo ? 'Excluindo...' : 'Sim, excluir'}
+                      </Botao>
+                      <Botao
+                        variante="secundario"
+                        onClick={() => setPedindoExclusao(false)}
+                        disabled={excluindo}
+                      >
+                        Cancelar
+                      </Botao>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                    <LinkBotao
+                      to={`/ocorrencias/${ocorrencia.id}/editar`}
+                      variante="secundario"
+                    >
+                      Editar
+                    </LinkBotao>
+                    <Botao variante="perigo" onClick={() => setPedindoExclusao(true)}>
+                      Excluir
+                    </Botao>
+                  </div>
+                )}
+              </div>
             )}
           </Cartao>
 

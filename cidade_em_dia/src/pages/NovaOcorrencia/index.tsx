@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Botao, LinkBotao } from '../../components/Botao/Botao';
 import CampoFormulario from '../../components/CampoFormulario/CampoFormulario';
 import { estiloCampo } from '../../components/CampoFormulario/estilos';
@@ -10,9 +10,15 @@ import { useAviso } from '../../contexto/AvisoContexto';
 import { useSessao } from '../../contexto/SessaoContexto';
 import { ErroApi, mensagemDeErro } from '../../services/api';
 import { listarCategorias } from '../../services/categoriaService';
-import { confirmarOcorrencia, registrarOcorrencia } from '../../services/ocorrenciaService';
+import {
+  atualizarOcorrencia,
+  buscarOcorrencia,
+  confirmarOcorrencia,
+  registrarOcorrencia,
+} from '../../services/ocorrenciaService';
 import type { EstadoRequisicao } from '../../types/api';
 import type { Categoria } from '../../types/categoria';
+import type { Ocorrencia } from '../../types/ocorrencia';
 import { marcarCamposInvalidos } from '../../utils/errosFormulario';
 import { linkValido } from '../../utils/validacao';
 
@@ -34,7 +40,15 @@ interface Duplicada {
   mensagem: string;
 }
 
+// Esta página serve para duas coisas:
+// - /ocorrencias/nova        -> registrar uma ocorrência (formulário vazio)
+// - /ocorrencias/7/editar    -> editar a ocorrência 7 (formulário preenchido)
 export default function NovaOcorrencia() {
+  // Só existe "id" na rota de edição. É ele que liga o modo edição.
+  const { id } = useParams();
+  const editando = id !== undefined;
+  const ocorrenciaId = Number(id);
+
   const { morador } = useSessao();
   const { mostrarAviso } = useAviso();
   const navegar = useNavigate();
@@ -42,6 +56,8 @@ export default function NovaOcorrencia() {
   const [categorias, setCategorias] = useState<EstadoRequisicao<Categoria[]>>({
     status: 'carregando',
   });
+  // Na edição, guarda a ocorrência como ela está hoje na API.
+  const [original, setOriginal] = useState<Ocorrencia | null>(null);
   const [tentativa, setTentativa] = useState(0);
   const [enviando, setEnviando] = useState(false);
   const [erroGeral, setErroGeral] = useState('');
@@ -52,6 +68,7 @@ export default function NovaOcorrencia() {
   const {
     register,
     handleSubmit,
+    reset,
     setValue,
     setError,
     formState: { errors },
@@ -61,11 +78,29 @@ export default function NovaOcorrencia() {
   });
 
   // Busca as categorias para preencher o campo de escolha.
+  // Na edição, busca junto a ocorrência para preencher o formulário.
   useEffect(() => {
     let ativo = true;
-    listarCategorias()
-      .then((lista) => {
-        if (ativo) setCategorias({ status: 'sucesso', dados: lista ?? [] });
+    Promise.all([
+      listarCategorias(),
+      editando ? buscarOcorrencia(ocorrenciaId) : null,
+    ])
+      .then(([lista, ocorrencia]) => {
+        if (!ativo) return;
+        if (ocorrencia) {
+          // reset troca os valores do formulário pelos da ocorrência.
+          reset({
+            categoriaId: ocorrencia.categoriaId,
+            titulo: ocorrencia.titulo,
+            descricao: ocorrencia.descricao,
+            endereco: ocorrencia.endereco ?? '',
+            latitude: ocorrencia.latitude,
+            longitude: ocorrencia.longitude,
+            urlFoto: ocorrencia.urlFoto ?? '',
+          });
+          setOriginal(ocorrencia);
+        }
+        setCategorias({ status: 'sucesso', dados: lista ?? [] });
       })
       .catch((erro) => {
         if (ativo) setCategorias({ status: 'erro', mensagem: mensagemDeErro(erro) });
@@ -73,7 +108,7 @@ export default function NovaOcorrencia() {
     return () => {
       ativo = false;
     };
-  }, [tentativa]);
+  }, [tentativa, editando, ocorrenciaId, reset]);
 
   // Usa a localização do aparelho (função nativa do navegador, sem biblioteca).
   // O navegador pede permissão para a pessoa antes de informar.
@@ -114,7 +149,7 @@ export default function NovaOcorrencia() {
     setErroGeral('');
     setDuplicada(null);
     try {
-      const criada = await registrarOcorrencia({
+      const corpo = {
         categoriaId: dados.categoriaId,
         moradorId: morador.id,
         titulo: dados.titulo.trim(),
@@ -124,8 +159,18 @@ export default function NovaOcorrencia() {
         // Campos opcionais vazios não são enviados.
         endereco: dados.endereco.trim() || undefined,
         urlFoto: dados.urlFoto.trim() || undefined,
-      });
+      };
 
+      if (editando) {
+        // PUT: salva as mudanças na ocorrência que já existe.
+        await atualizarOcorrencia(ocorrenciaId, corpo);
+        mostrarAviso({ tipo: 'sucesso', mensagem: 'Ocorrência atualizada com sucesso.' });
+        navegar(`/ocorrencias/${ocorrenciaId}`);
+        return;
+      }
+
+      // POST: cria uma ocorrência nova.
+      const criada = await registrarOcorrencia(corpo);
       mostrarAviso({ tipo: 'sucesso', mensagem: 'Ocorrência registrada com sucesso.' });
       // Se a API devolveu a ocorrência criada, abre o detalhe dela.
       navegar(criada?.id ? `/ocorrencias/${criada.id}` : '/ocorrencias');
@@ -165,7 +210,13 @@ export default function NovaOcorrencia() {
     }
   }
 
-  const titulo = (
+  const titulo = editando ? (
+    <TituloPagina
+      sobretitulo="Ocorrências"
+      titulo="Editar ocorrência"
+      descricao="Corrija o que foi registrado errado. O status e as confirmações continuam os mesmos."
+    />
+  ) : (
     <TituloPagina
       sobretitulo="Ocorrências"
       titulo="Registrar ocorrência"
@@ -173,21 +224,45 @@ export default function NovaOcorrencia() {
     />
   );
 
-  // Sem login não dá para registrar: a API exige o id do morador.
+  // Endereço desta página, para voltar a ela depois do login.
+  const estaPagina = editando ? `/ocorrencias/${id}/editar` : '/ocorrencias/nova';
+  // Para onde o botão Cancelar leva.
+  const aoCancelar = editando ? `/ocorrencias/${id}` : '/ocorrencias';
+
+  // Sem login não dá para registrar nem editar: a API exige o id do morador.
   if (!morador) {
     return (
       <>
         {titulo}
         <SemDados
-          titulo="Entre para registrar"
-          texto="Para registrar uma ocorrência você precisa estar conectado à sua conta."
+          titulo={editando ? 'Entre para editar' : 'Entre para registrar'}
+          texto={
+            editando
+              ? 'Para editar uma ocorrência você precisa estar conectado à conta que a registrou.'
+              : 'Para registrar uma ocorrência você precisa estar conectado à sua conta.'
+          }
         >
           <div className="flex flex-col gap-3 sm:flex-row">
-            <LinkBotao to="/entrar?voltar=/ocorrencias/nova">Entrar</LinkBotao>
-            <LinkBotao to="/cadastro?voltar=/ocorrencias/nova" variante="secundario">
+            <LinkBotao to={`/entrar?voltar=${estaPagina}`}>Entrar</LinkBotao>
+            <LinkBotao to={`/cadastro?voltar=${estaPagina}`} variante="secundario">
               Criar conta
             </LinkBotao>
           </div>
+        </SemDados>
+      </>
+    );
+  }
+
+  // Só quem registrou a ocorrência pode editá-la.
+  if (original && original.moradorId !== morador.id) {
+    return (
+      <>
+        {titulo}
+        <SemDados
+          titulo="Você não pode editar esta ocorrência"
+          texto="Só o morador que registrou a ocorrência pode alterá-la."
+        >
+          <LinkBotao to={aoCancelar}>Voltar para a ocorrência</LinkBotao>
         </SemDados>
       </>
     );
@@ -425,9 +500,13 @@ export default function NovaOcorrencia() {
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Botao type="submit">
-                {enviando ? 'Enviando...' : 'Registrar ocorrência'}
+                {enviando
+                  ? 'Enviando...'
+                  : editando
+                    ? 'Salvar alterações'
+                    : 'Registrar ocorrência'}
               </Botao>
-              <LinkBotao to="/ocorrencias" variante="secundario">
+              <LinkBotao to={aoCancelar} variante="secundario">
                 Cancelar
               </LinkBotao>
             </div>

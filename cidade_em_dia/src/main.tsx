@@ -39,6 +39,9 @@ const roteador = createBrowserRouter([
       { path: 'ocorrencias/nova', element: <NovaOcorrencia /> },
       // ":id" é um parâmetro: /ocorrencias/7 abre a ocorrência de id 7.
       { path: 'ocorrencias/:id', element: <DetalheOcorrencia /> },
+      // Editar usa a mesma página do registro: com ":id" ela entra em modo edição.
+      // A key diferente faz o React montar a página do zero ao trocar de rota.
+      { path: 'ocorrencias/:id/editar', element: <NovaOcorrencia key="editar" /> },
       { path: 'entrar', element: <Entrar /> },
       { path: 'cadastro', element: <Cadastro /> },
 

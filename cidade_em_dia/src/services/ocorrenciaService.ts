@@ -28,6 +28,16 @@ export function registrarOcorrencia(ocorrencia: OcorrenciaPayload) {
   return requisitar<Ocorrencia | undefined>('/ocorrencias', 'POST', ocorrencia);
 }
 
+// PUT /ocorrencias/{id} — troca os dados da ocorrência pelos novos.
+export function atualizarOcorrencia(id: number, ocorrencia: OcorrenciaPayload) {
+  return requisitar<Ocorrencia | undefined>(`/ocorrencias/${id}`, 'PUT', ocorrencia);
+}
+
+// DELETE /ocorrencias/{id} — a resposta vem sem corpo.
+export function excluirOcorrencia(id: number) {
+  return requisitar<void>(`/ocorrencias/${id}`, 'DELETE');
+}
+
 // GET /ocorrencias/{id}/atualizacoes
 export function listarAtualizacoes(ocorrenciaId: number) {
   return requisitar<Atualizacao[]>(`/ocorrencias/${ocorrenciaId}/atualizacoes`);
