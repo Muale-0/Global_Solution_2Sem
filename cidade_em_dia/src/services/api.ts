@@ -54,13 +54,6 @@ export async function requisitar<T>(
   metodo: MetodoHttp = 'GET',
   corpo?: object,
 ): Promise<T> {
-  // TEMPORÁRIO: enquanto a API Java não está no ar, usa os dados de exemplo.
-  // Remover este bloco junto com a pasta src/mocks antes da entrega.
-  if (import.meta.env.DEV && import.meta.env.VITE_USAR_MOCK === 'true') {
-    const { responderMock } = await import('../mocks/apiSimulada');
-    return responderMock<T>(caminho, metodo, corpo);
-  }
-
   if (!API_URL) {
     throw new ErroApi('O endereço da API não foi configurado (VITE_API_URL).', 0);
   }
