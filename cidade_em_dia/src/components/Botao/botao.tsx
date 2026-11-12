@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-type Variante = 'primario' | 'secundario' | 'destaque' | 'transparente';
+type Variante = 'primario' | 'secundario' | 'destaque' | 'transparente' | 'perigo';
 
 // Classes que todo botão tem, não importa a cor.
 // min-h-11 garante 44px de altura, tamanho confortável para tocar no celular.
@@ -14,6 +14,10 @@ const estiloVariante: Record<Variante, string> = {
   destaque: 'bg-destaque-400 text-black shadow-sm hover:bg-destaque-300 hover:shadow-md',
   // Para usar em cima de faixas escuras (destaque da Home).
   transparente: 'bg-white/10 text-white ring-1 ring-white/30 ring-inset hover:bg-white/20',
+  // Vermelho, para ações que não têm volta (excluir).
+  // text-slate-50 é claro no modo claro e escuro no modo escuro,
+  // acompanhando o vermelho, que fica mais claro no escuro.
+  perigo: 'bg-rose-600 text-slate-50 shadow-sm hover:bg-rose-700 hover:shadow-md',
 };
 
 function montarClasses(variante: Variante, extras: string) {
