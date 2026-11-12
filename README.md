@@ -10,7 +10,7 @@ Projeto da **Global Solution 2026/2 da FIAP**, tema **CitizenTech**, disciplina 
 | --- | --- |
 | Repositório no GitHub | https://github.com/Muale-0/Global_Solution_2Sem |
 | Aplicação publicada (Vercel) | _a preencher após o deploy_ |
-| API Java (Render) | _a preencher quando a API for publicada_ |
+| API Java (Render) | https://cidade-em-dia-q2dd.onrender.com |
 | Vídeo de demonstração (YouTube) | _a preencher após a gravação_ |
 
 ## Objetivo
@@ -22,6 +22,7 @@ O que a aplicação faz:
 - lista as ocorrências, com filtro por status e categoria;
 - mostra o detalhe de cada ocorrência, com a linha do tempo das mudanças de status;
 - permite ao morador criar conta, entrar, registrar ocorrências e confirmar as de outros moradores;
+- permite a quem registrou uma ocorrência editá-la ou excluí-la;
 - avisa quando já existe uma ocorrência parecida no mesmo local e oferece confirmá-la em vez de duplicar;
 - oferece à gestão pública um painel com o total por status e a atualização do andamento.
 
@@ -52,6 +53,8 @@ O front-end consome a API REST em Java (Spring Boot) da disciplina Domain Driven
 | GET | `/ocorrencias/{id}/confirmacoes` | Confirmações e comentários |
 | GET | `/categorias` | Filtros e formulário de registro |
 | POST | `/ocorrencias` | Registrar ocorrência |
+| PUT | `/ocorrencias/{id}` | Editar ocorrência (só quem registrou) |
+| DELETE | `/ocorrencias/{id}` | Excluir ocorrência (só quem registrou) |
 | POST | `/ocorrencias/{id}/confirmacoes` | Confirmar ocorrência |
 | POST | `/ocorrencias/{id}/atualizacoes` | Atualizar status (gestão) |
 | POST | `/moradores` | Criar conta |
@@ -66,7 +69,8 @@ O endereço fica em uma variável de ambiente, para trocar entre a API local e a
 ```bash
 cd cidade_em_dia
 cp .env.example .env.local
-# edite o .env.local, por exemplo:
+# o modelo já aponta para a API publicada no Render;
+# para usar a API rodando no seu computador, troque por:
 # VITE_API_URL=http://localhost:8080
 ```
 
@@ -134,6 +138,7 @@ Se recebeu o projeto em ZIP, descompacte, entre em `cidade_em_dia` e rode os mes
 | `/ocorrencias` | Lista de ocorrências |
 | `/ocorrencias/nova` | Registrar ocorrência |
 | `/ocorrencias/:id` | Detalhe da ocorrência (rota com parâmetro) |
+| `/ocorrencias/:id/editar` | Editar ocorrência (só quem registrou) |
 | `/entrar` | Login do morador |
 | `/cadastro` | Cadastro de morador |
 | `/gestao` | Painel da gestão pública |
